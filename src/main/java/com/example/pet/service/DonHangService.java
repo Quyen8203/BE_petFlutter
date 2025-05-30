@@ -9,8 +9,6 @@ import com.example.pet.repository.SanPhamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -19,25 +17,16 @@ import java.util.Optional;
 public class DonHangService {
 
     @Autowired
-    private ChiTieuService chiTieuService;
-    @Autowired
     private NguoiDungRepository nguoiDungRepository;
+
     @Autowired
     private SanPhamRepository sanPhamRepository;
 
-    public DonHang updateDonHang(DonHang donHang) {
-        DonHang updated = donHangRepository.save(donHang);
-
-        if ("Thành Công".equalsIgnoreCase(donHang.getTrangThai())) {
-            chiTieuService.saveFromDonHang(donHang);
-        }
-
-        return updated;
-    }
-
-
     @Autowired
     private DonHangRepository donHangRepository;
+
+    @Autowired
+    private VanChuyenService vanChuyenService;
 
     public List<DonHang> getAllDonHangs() {
         return donHangRepository.findAll();
@@ -47,37 +36,25 @@ public class DonHangService {
         return donHangRepository.findById(id);
     }
 
-    public DonHang addDonHang(DonHang donHang) {
-        NguoiDung nguoidung = nguoiDungRepository.findById(donHang.getNguoidung().getId()).orElse(null);
-        SanPham sanpham = sanPhamRepository.findById(donHang.getSanpham().getIdsp()).orElse(null);
+    public List<DonHang> getDonHangsByUserId(int userId) {
+        return donHangRepository.findByNguoidung_Id(userId);
+    }
 
-        if (nguoidung == null || sanpham == null) {
-            throw new RuntimeException("Người dùng hoặc sản phẩm không tồn tại!");
-        }
+    public DonHang addDonHang(DonHang donHang) {
+        NguoiDung nguoidung = nguoiDungRepository.findById(donHang.getNguoidung().getId())
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+        SanPham sanpham = sanPhamRepository.findById(donHang.getSanpham().getIdsp())
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
         donHang.setNguoidung(nguoidung);
         donHang.setSanpham(sanpham);
+        donHang.setNgay_dat_hang(new Date());
 
-        //Nếu thanh toán thành công → trừ kho
-        if ("Thành Công".equalsIgnoreCase(donHang.getTrangThai())) {
-            if (sanpham.getSl() >= donHang.getSoluong()) {
-                sanpham.setSl(sanpham.getSl() - donHang.getSoluong());
-                sanPhamRepository.save(sanpham); // cập nhật số lượng còn lại
-            } else {
-                throw new RuntimeException("Sản phẩm không đủ số lượng trong kho!");
-            }
-        }
+        DonHang savedDonHang = donHangRepository.save(donHang);
+        vanChuyenService.createVanChuyenForDonHang(savedDonHang);
 
-        DonHang saved = donHangRepository.save(donHang);
-
-        // ✅ Lưu chi tiêu nếu thành công
-        if ("Thành Công".equalsIgnoreCase(saved.getTrangThai())) {
-            chiTieuService.saveFromDonHang(saved);
-        }
-
-        return saved;
+        return savedDonHang;
     }
-
 
     public void deleteDonHang(int id) {
         donHangRepository.deleteById(id);

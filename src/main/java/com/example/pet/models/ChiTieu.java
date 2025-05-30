@@ -26,4 +26,7 @@ public class ChiTieu {
     @Column(name = "id_nd")
     private int userId;
 
+    @Column(name = "idl")
+    private int idl;
+
 }

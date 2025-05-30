@@ -3,6 +3,7 @@ package com.example.pet.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
@@ -41,8 +42,6 @@ public class DonHang {
     @Column(name = "ngay_dat_hang")
     private Date ngay_dat_hang;
 
-    @Column(name = "trangThai")
-    private String trangThai;
 
     @ManyToOne
     @JoinColumn(name = "id", nullable = false)
@@ -52,6 +51,8 @@ public class DonHang {
     @JoinColumn(name = "idsp", nullable = false)
     private SanPham sanpham;
 
+    @OneToOne(mappedBy = "donHang", cascade = CascadeType.ALL)
+    private VanChuyen vanChuyen;
 
     public int getId() {
         return id;
@@ -109,14 +110,6 @@ public class DonHang {
         this.ngay_dat_hang = ngay_dat_hang;
     }
 
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }
-
     public NguoiDung getNguoidung() {
         return nguoidung;
     }
@@ -131,5 +124,13 @@ public class DonHang {
 
     public void setSanpham(SanPham sanpham) {
         this.sanpham = sanpham;
+    }
+
+    public VanChuyen getVanChuyen() {
+        return vanChuyen;
+    }
+
+    public void setVanChuyen(VanChuyen vanChuyen) {
+        this.vanChuyen = vanChuyen;
     }
 }

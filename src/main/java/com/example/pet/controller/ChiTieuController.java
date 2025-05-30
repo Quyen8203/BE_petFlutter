@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/chi-tieu")
+@CrossOrigin(origins = "", allowedHeaders = "*", methods = {})
 public class ChiTieuController {
 
     @Autowired

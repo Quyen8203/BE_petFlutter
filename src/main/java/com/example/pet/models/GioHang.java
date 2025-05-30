@@ -23,4 +23,8 @@ public class GioHang {
     private SanPham sanpham;
 
     private int soluong;
+
+    @ManyToOne
+    @JoinColumn(name = "idl")
+    private Loai loai;
 }

@@ -1,7 +1,6 @@
 package com.example.pet.controller;
 
 import com.example.pet.models.DonHang;
-import com.example.pet.service.ChiTieuService;
 import com.example.pet.service.DonHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,43 +8,41 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/don-hang")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "", allowedHeaders = "*", methods = {})
 public class DonHangController {
 
     @Autowired
     private DonHangService donHangService;
 
-    // Lấy tất cả đơn hàng
     @GetMapping
     public ResponseEntity<List<DonHang>> getAllDonHangs() {
         return ResponseEntity.ok(donHangService.getAllDonHangs());
     }
 
-    // Lấy đơn hàng theo ID
-    @GetMapping("/{id}")
-    public ResponseEntity<DonHang> getDonHangById(@PathVariable int id) {
-        return donHangService.getDonHangById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/nguoidung/{userId}")
+    public ResponseEntity<List<DonHang>> getDonHangsByUserId(@PathVariable int userId) {
+        return ResponseEntity.ok(donHangService.getDonHangsByUserId(userId));
     }
 
-    @PutMapping("up/{id}")
-    public ResponseEntity<DonHang> updateDonHang(@PathVariable int id, @RequestBody DonHang donHang) {
-        donHang.setId(id);
-        DonHang updated = donHangService.updateDonHang(donHang);
-        return ResponseEntity.ok(updated);
+    @GetMapping("/{id}")
+    public ResponseEntity<DonHang> getDonHangById(@PathVariable int id) {
+        Optional<DonHang> donHang = donHangService.getDonHangById(id);
+        return donHang.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<DonHang> createDonHang(@RequestBody DonHang donHang) {
-        DonHang saved = donHangService.addDonHang(donHang);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    public ResponseEntity<DonHang> addDonHang(@RequestBody DonHang donHang) {
+        return ResponseEntity.ok(donHangService.addDonHang(donHang));
     }
 
-
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDonHang(@PathVariable int id) {
+        donHangService.deleteDonHang(id);
+        return ResponseEntity.ok().build();
+    }
 }
-

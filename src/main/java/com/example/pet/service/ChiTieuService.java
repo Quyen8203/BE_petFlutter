@@ -29,6 +29,7 @@ public class ChiTieuService {
         ct.setThanhtien(dh.getThanhtien());
         ct.setIddon(dh.getId());
         ct.setUserId(dh.getNguoidung().getId());
+        ct.setIdl(dh.getNguoidung().getId());
         repository.save(ct);
     }
 
